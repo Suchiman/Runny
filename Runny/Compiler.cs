@@ -10,7 +10,7 @@ namespace Runny
 {
     public static class Compiler
     {
-        public static Assembly LoadSource(string source)
+        public static (bool success, Assembly asm) LoadSource(string source)
         {
             var references = new List<MetadataReference>();
             references.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
@@ -35,21 +35,21 @@ namespace Runny
                         break;
                     case DiagnosticSeverity.Error:
                         error = true;
-                        Console.Error.WriteLine(diag.ToString());
+                        Console.WriteLine(diag.ToString());
                         break;
                 }
             }
 
             if (error)
             {
-                throw new Exception("Compilation failed");
+                return (false, null);
             }
 
             using (var outputAssembly = new MemoryStream())
             {
                 compilation.Emit(outputAssembly);
 
-                return Assembly.Load(outputAssembly.ToArray());
+                return (true, Assembly.Load(outputAssembly.ToArray()));
             }
         }
 

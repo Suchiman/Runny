@@ -20,8 +20,6 @@ class Program
         public void Run()
         {
             Output = "";
-            var asm = Compiler.LoadSource(Code);
-            var hasArgs = asm.EntryPoint.GetParameters().Length > 0;
 
             var currentOut = Console.Out;
             var writer = new StringWriter();
@@ -30,7 +28,12 @@ class Program
             Exception exception = null;
             try
             {
-                asm.EntryPoint.Invoke(null, hasArgs ? new string[][] { null } : null);
+                var (success, asm) = Compiler.LoadSource(Code);
+                if (success)
+                {
+                    var hasArgs = asm.EntryPoint.GetParameters().Length > 0;
+                    asm.EntryPoint.Invoke(null, hasArgs ? new string[][] { null } : null);
+                }
             }
             catch (Exception ex)
             {
