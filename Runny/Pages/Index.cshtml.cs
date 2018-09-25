@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.AspNetCore.Blazor.Components;
 
@@ -20,6 +21,9 @@ class Program
         public void Run()
         {
             Output = "";
+
+            Console.WriteLine("Compiling and Running code");
+            var sw = Stopwatch.StartNew();
 
             var currentOut = Console.Out;
             var writer = new StringWriter();
@@ -45,6 +49,9 @@ class Program
                 Output += "\r\n" + exception.ToString();
             }
             Console.SetOut(currentOut);
+
+            sw.Stop();
+            Console.WriteLine("Done in " + sw.ElapsedMilliseconds + "ms");
         }
     }
 }
