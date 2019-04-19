@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using Microsoft.AspNetCore.Blazor.Components;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
 
 namespace Runny.Pages
 {
-    public class IndexModel : BlazorComponent
+    public class IndexModel : ComponentBase
     {
         public string Output = "";
         public string Code = @"using System;
@@ -18,7 +20,20 @@ class Program
     }
 }";
 
+        [Inject] private HttpClient Client { get; set; }
+
+        protected override Task OnInitAsync()
+        {
+            Compiler.InitializeMetadataReferences(Client);
+            return base.OnInitAsync();
+        }
+
         public void Run()
+        {
+            Compiler.WhenReady(RunInternal);
+        }
+
+        void RunInternal()
         {
             Output = "";
 
