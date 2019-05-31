@@ -48,7 +48,7 @@ namespace Runny
             InitializationTask = InitializeInternal();
         }
 
-        public static void WhenReady(Action action)
+        public static void WhenReady(Func<Task> action)
         {
             if (InitializationTask.Status != TaskStatus.RanToCompletion)
             {

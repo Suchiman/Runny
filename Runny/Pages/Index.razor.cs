@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 
@@ -33,7 +34,7 @@ class Program
             Compiler.WhenReady(RunInternal);
         }
 
-        void RunInternal()
+        async Task RunInternal()
         {
             Output = "";
 
@@ -50,8 +51,17 @@ class Program
                 var (success, asm) = Compiler.LoadSource(Code);
                 if (success)
                 {
-                    var hasArgs = asm.EntryPoint.GetParameters().Length > 0;
-                    asm.EntryPoint.Invoke(null, hasArgs ? new string[][] { null } : null);
+                    var entry = asm.EntryPoint;
+                    if (entry.Name == "<Main>") // sync wrapper over async Task Main
+                    {
+                        entry = entry.DeclaringType.GetMethod("Main", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static); // reflect for the async Task Main
+                    }
+                    var hasArgs = entry.GetParameters().Length > 0;
+                    var result = entry.Invoke(null, hasArgs ? new object[] { new string[0] } : null);
+                    if (result is Task t)
+                    {
+                        await t;
+                    }
                 }
             }
             catch (Exception ex)
@@ -67,6 +77,8 @@ class Program
 
             sw.Stop();
             Console.WriteLine("Done in " + sw.ElapsedMilliseconds + "ms");
+
+            StateHasChanged();
         }
     }
 }
