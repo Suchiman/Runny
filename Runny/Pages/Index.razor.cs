@@ -10,8 +10,9 @@ namespace Runny.Pages
 {
     public class IndexModel : ComponentBase
     {
+        public bool Initialized;
         public string Output = "";
-        public string Code = @"using System;
+        const string DefaultCode = @"using System;
 
 class Program
 {
@@ -22,11 +23,22 @@ class Program
 }";
 
         [Inject] private HttpClient Client { get; set; }
+        [Inject] private Monaco Monaco { get; set; }
 
         protected override Task OnInitializedAsync()
         {
             Compiler.InitializeMetadataReferences(Client);
             return base.OnInitializedAsync();
+        }
+
+        protected override void OnAfterRender()
+        {
+            base.OnAfterRender();
+            if (!Initialized)
+            {
+                Monaco.Initialize("container", DefaultCode, "csharp");
+                Initialized = true;
+            }
         }
 
         public void Run()
@@ -48,7 +60,7 @@ class Program
             Exception exception = null;
             try
             {
-                var (success, asm) = Compiler.LoadSource(Code);
+                var (success, asm) = Compiler.LoadSource(Monaco.GetCode("container"));
                 if (success)
                 {
                     var entry = asm.EntryPoint;

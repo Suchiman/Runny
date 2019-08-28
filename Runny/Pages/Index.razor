@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inherits IndexModel
 
-<textarea @bind="Code" rows="20" cols="100"></textarea>
+<div id="container" style="width:1024px;height:600px;border:1px solid grey"></div>
 <button class="btn" @onclick="Run">Run</button>
-<textarea @bind="Output" rows="20" cols="100"></textarea>
+<br />
+<textarea @bind="Output" rows="10" cols="120"></textarea>

@@ -7,6 +7,7 @@ namespace Runny
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<Monaco>();
         }
 
         public void Configure(IComponentsApplicationBuilder app)
