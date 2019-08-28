@@ -65,7 +65,7 @@ namespace Runny
             var compilation = CSharpCompilation.Create("DynamicCode")
                 .WithOptions(new CSharpCompilationOptions(OutputKind.ConsoleApplication))
                 .AddReferences(References)
-                .AddSyntaxTrees(CSharpSyntaxTree.ParseText(source));
+                .AddSyntaxTrees(CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview)));
 
             ImmutableArray<Diagnostic> diagnostics = compilation.GetDiagnostics();
 
