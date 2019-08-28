@@ -23,10 +23,10 @@ class Program
 
         [Inject] private HttpClient Client { get; set; }
 
-        protected override Task OnInitAsync()
+        protected override Task OnInitializedAsync()
         {
             Compiler.InitializeMetadataReferences(Client);
-            return base.OnInitAsync();
+            return base.OnInitializedAsync();
         }
 
         public void Run()
