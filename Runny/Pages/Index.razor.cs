@@ -10,7 +10,6 @@ namespace Runny.Pages
 {
     public class IndexModel : ComponentBase
     {
-        public bool Initialized;
         public string Output = "";
         const string DefaultCode = @"using System;
 
@@ -31,13 +30,12 @@ class Program
             return base.OnInitializedAsync();
         }
 
-        protected override void OnAfterRender()
+        protected override void OnAfterRender(bool firstRender)
         {
-            base.OnAfterRender();
-            if (!Initialized)
+            base.OnAfterRender(firstRender);
+            if (firstRender)
             {
                 Monaco.Initialize("container", DefaultCode, "csharp");
-                Initialized = true;
             }
         }
 
