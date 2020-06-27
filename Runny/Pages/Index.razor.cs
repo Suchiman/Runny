@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Runny.Pages
 {
-    public class IndexModel : ComponentBase
+    public partial class Index
     {
         public string Output = "";
         const string DefaultCode = @"using System;
@@ -36,12 +36,13 @@ class Program
             if (firstRender)
             {
                 Monaco.Initialize("container", DefaultCode, "csharp");
+                Run();
             }
         }
 
-        public void Run()
+        public Task Run()
         {
-            Compiler.WhenReady(RunInternal);
+            return Compiler.WhenReady(RunInternal);
         }
 
         async Task RunInternal()
@@ -87,8 +88,6 @@ class Program
 
             sw.Stop();
             Console.WriteLine("Done in " + sw.ElapsedMilliseconds + "ms");
-
-            StateHasChanged();
         }
     }
 }

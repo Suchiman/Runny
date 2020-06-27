@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Runny
 {
@@ -16,12 +16,19 @@ namespace Runny
     {
         class BlazorBoot
         {
-            public string main { get; set; }
-            public string entryPoint { get; set; }
-            public string[] assemblyReferences { get; set; }
-            public string[] cssReferences { get; set; }
-            public string[] jsReferences { get; set; }
+            public bool cacheBootResources { get; set; }
+            public object[] config { get; set; }
+            public bool debugBuild { get; set; }
+            public string entryAssembly { get; set; }
             public bool linkerEnabled { get; set; }
+            public Resources resources { get; set; }
+        }
+
+        class Resources
+        {
+            public Dictionary<string, string> assembly { get; set; }
+            public Dictionary<string, string> pdb { get; set; }
+            public Dictionary<string, string> runtime { get; set; }
         }
 
         private static Task InitializationTask;
@@ -31,8 +38,8 @@ namespace Runny
         {
             async Task InitializeInternal()
             {
-                var response = await client.GetJsonAsync<BlazorBoot>("_framework/blazor.boot.json");
-                var assemblies = await Task.WhenAll(response.assemblyReferences.Where(x => x.EndsWith(".dll")).Select(x => client.GetAsync("_framework/_bin/" + x)));
+                var response = await client.GetFromJsonAsync<BlazorBoot>("_framework/blazor.boot.json");
+                var assemblies = await Task.WhenAll(response.resources.assembly.Keys.Select(x => client.GetAsync("_framework/_bin/" + x)));
 
                 var references = new List<MetadataReference>(assemblies.Length);
                 foreach (var asm in assemblies)
@@ -48,15 +55,15 @@ namespace Runny
             InitializationTask = InitializeInternal();
         }
 
-        public static void WhenReady(Func<Task> action)
+        public static Task WhenReady(Func<Task> action)
         {
             if (InitializationTask.Status != TaskStatus.RanToCompletion)
             {
-                InitializationTask.ContinueWith(x => action());
+                return InitializationTask.ContinueWith(x => action());
             }
             else
             {
-                action();
+                return action();
             }
         }
 
